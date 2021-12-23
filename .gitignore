@@ -106,3 +106,4 @@ ENV/
 
 # IDE settings
 .vscode/
+notebooks/organoid_reduction_neighbors_15_components_50.csv

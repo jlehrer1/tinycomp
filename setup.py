@@ -27,11 +27,10 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-#   description=" A Python library for doing computations on small subsets of a DataFrame too large to fit in memory.",
-#
+  description=" A Python library for doing computations on small subsets of a DataFrame too large to fit in memory.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme + '\n\n',
     include_package_data=True,
     keywords='tinycomp',
     name='tinycomp',
@@ -41,3 +40,4 @@ setup(
     tests_require=test_requirements,
     url='https://github.com/jlehrer1/tinycomp',
     version='0.1.0',
+)
