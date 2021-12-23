@@ -1,6 +1,4 @@
-==================  
-BigSmall DataFrame
-==================
+# TinyComp
 
  A Python library for doing computations on small subsets of a DataFrame too large to fit in memory.
 
