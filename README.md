@@ -1,6 +1,8 @@
 # TinyComp: 
 
-A Python library for doing computations on small subsets of a **numeric** `.csv` data file too large to fit entirely in memory. The library follows similarly to the `Pandas` API. Originally developed for my research at the UCSC Genomics Insitute with massive single-cell datasets, this library serves to be a minimal and quick tool for analysis on large datasets.
+## A Library for Computation on Small Subsets of Big Numeric Data
+
+`TinyComp` is a Python library for doing computations on small subsets of a **numeric** `.csv` data file too large to fit entirely in memory. The library follows similarly to the `Pandas` API. Originally developed for my research at the UCSC Genomics Insitute with massive single-cell datasets, this library serves to be a minimal and quick tool for analysis on large datasets.
 
 ## Why not Dask?
 
