@@ -97,11 +97,13 @@ class Dataset:
         
         if self.rows is None and rows is None:
             raise ValueError(
-                f'{self.__class__} object must either be initialized with a list of rows or a list of rows must be passed to this method.'
+                f"""{self.__class__} object was not initialized with a list of rows.
+                Either reinitialize with a list or rows or pass a list of rows to this method."""
             )
         if self.rows is not None and rows is not None:
             raise ValueError(
-                f'{self.__class__} object must either be initialized with a list of rows or rows must be passed to this method, not both.'
+                f"""{self.__class__} object was initialized with a list of rows. Therefore, a list of rows may not be 
+                passed to this method. Either reinitialize without a defined list of rows or do not pass a list into this method. """
             )
         
         return rows if rows != None else self.rows
@@ -120,53 +122,43 @@ class Dataset:
         csv_data = csv.reader([line])
         return [x for x in csv_data][0]
     
-    def _rowsum(self, rows=None, n=20):
+    def nlargest(self, rows=None, n=20, axis='rows', ascending=False):
         """
-        Sums a list of rows, elementwise 
-        
-        Parameters:
-        rows: List of rows to sum
-        
-        Returns:
-        list: Sum of rows, elementwise
+        Gets the n largest rows or columns, depending on the axis 
         """
+        
+        axis = (1 if axis == 'rows' else 0)
         rows = self._row_get(rows)
+        s = np.sum(self[rows], axis=axis)
         
-        s = self[rows[0]]
-        
-        for idx in rows[1:]:
-            s += self[idx]
-        
-        return s
-        
-    def nlargest(self, rows=None, n=20, axis=-1, ascending=False):
-        """
-        Gets the n largest columns 
-        """
-        
-        rows = self._row_get(rows)
-        s = self._rowsum(rows, n)
-        
-        data = [self.columns[idx] for idx in np.argsort(s, axis=axis)[-n: ]]
+        if axis == 0:
+            data = [self.columns[idx] for idx in np.argsort(s)[-n: ]]
+        else:
+            data = np.argsort(s)[-n: ]
+            
         return data[::-1] if ascending else data
     
-    def nsmallest(self, rows=None, n=20, axis=-1, ascending=False):
+    def nsmallest(self, rows=None, n=20, axis='rows', ascending=False):
         """
-        Gets the n smallest columns
+        Gets the n smallest rows or columns, depending on the axis 
         """
+        
+        axis = (1 if axis == 'rows' else 0)
         rows = self._row_get(rows)
-        s = self._rowsum(rows, n)
-
-        data = [self.columns[idx] for idx in np.argsort(s, axis=axis)[0: n]]
-        return data if ascending else data[::-1]
+        s = np.sum(self[rows], axis=axis)
+        
+        if axis == 0:
+            data = [self.columns[idx] for idx in np.argsort(s)[0: n]]
+        else:
+            data = np.argsort(s)[0: n]
+            
+        return data[::-1] if ascending else data
     
     def max(self, rows=None):
         rows = self._row_get(rows)
-        
         return max(self[rows])
     
     def min(self, rows=None):
         rows = self._row_get(rows)
-        
         return min(self[rows])
         
