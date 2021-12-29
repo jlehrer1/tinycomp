@@ -1,6 +1,6 @@
-# TinyComp
+# TinyComp: 
 
-A Python library for doing computations on small subsets of a DataFrame too large to fit in memory. Originally developed for my research at the UCSC Genomics Insitute with massive single-cell datasets, this library serves to be a minimal and quick tool for analysis on large datasets.
+A Python library for doing computations on small subsets of a **numeric** `.csv` data file too large to fit entirely in memory. The library follows similarly to the `Pandas` API. Originally developed for my research at the UCSC Genomics Insitute with massive single-cell datasets, this library serves to be a minimal and quick tool for analysis on large datasets.
 
 ## Why not Dask?
 
@@ -35,10 +35,10 @@ Then, we can slice normally, like so
 ```
 
 ## Similarities to Pandas
-The library API is built to be as similar as possible to `Pandas`. `Dataset`'s have `.shape, .columns` and some other common attributes, as well as `nlargest`, `nsmallest`, `max`, `min`, etc. The critical difference is *all of these methods must have an `Iterable` passed in the `indices` argument*, to specify the subset of the data we're currently working with.
+The library API is built to be as similar as possible to `Pandas`. `Dataset`'s have `.shape, .columns` and some other common attributes, as well as `nlargest`, `nsmallest`, `max`, `min`, etc. The critical difference is *all of these methods must have an `Iterable` passed in the `rows` argument, or the class must be initialized with an Iterable of `rows`*, to specify the subset of the data we're currently working with.
 
 ```python
->>> data.nlargest(range(600, 650))
+>>> data.nlargest(rows=range(600, 650))
 ['col_42',
  'col_35',
  'col_8',

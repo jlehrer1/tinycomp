@@ -4,53 +4,169 @@ import linecache
 import numpy as np 
 
 class Dataset:
-    def __init__(self, filename):
+    def __init__(self, filename: str, rows: list=None):
+        """
+        Dataset method can either be initialized with a list of rows (mutable by changing the rows attribute),
+        or a new list of rows may be passed in for each method that requires it, but not both (this would be ambiguous).
+        
+        Parameters:
+        filename: Path to csv file 
+        rows (optional): List of rows to initialize the dataset with
+        
+        Returns:
+        None
+        """
+        # Private attributes
         self._filename = filename
         self._total_data = self._numline(filename)
+        
+        # Public attributes 
+        self.rows = rows
+        
+        # Public attributes (Pandas API-like)
+        self.index = rows
         self.columns = self._get_columns()
         self.shape = (self._total_data, len(self.columns))
         
+    # Python dunder methods
+    
     def __getitem__(self, idx):
         if isinstance(idx, slice):
             step = (1 if idx.step == None else idx.step)
             return np.array([self._getline(i) for i in range(idx.start, idx.stop, step)]).astype(float)
-        elif isinstance(idx, list):
+        elif isinstance(idx, (list, range)):
             return np.array([self._getline(i) for i in idx]).astype(float)
         elif isinstance(idx, int):
             return np.array(self._getline(idx)).astype(float)
         else:
             raise TypeError(f"Index must be list or int, not {type(idx).__name__}")
+
+    def __len__(self):
+        return self._total_data
+
+    def __str__(self):
+        if self.rows is not None:
+            return str(self.__getitem__(self.rows))
+        else:
+            return 'Dataset()'
             
+    def __repr__(self):
+        return self.__str__()
+    
     def _getline(self, idx):
+        """
+        Returns a line from a csv file as a list of strings (not type-checked)
+        
+        Parameters:
+        idx: Row to return from file 
+        
+        Returns:
+        list: Row of file with each comma-separated value as a distinct value in the list 
+        """
         line = linecache.getline(self._filename, idx + 2)
         csv_data = csv.reader([line])
         data = [x for x in csv_data][0]
         return data
     
     def _numline(self, filename):
+        """
+        Gets the number of lines in a file, should only be used for getting the total number of rows on object initialization
+        
+        Parameters:
+        filename: Path to the file to get the number of lines from
+        
+        Returns:
+        n: Number of lines in the file
+        """
         n = 0
         with open(filename, "r") as f:
             n = len(f.readlines()) - 1
         return n
-
-    def __len__(self):
-        return self._total_data
+    
+    def _row_get(self, rows: list):
+        """
+        Returns rows from a file, either with a passed list or from the list of rows upon object initialization.
+        Also performs error checking to make sure either rows were set upon initialization or passed, but not both or neither. 
+        
+        Parameters:
+        rows: List of rows
+        
+        Returns:
+        list: Array of row values from file 
+        """
+        
+        if self.rows is None and rows is None:
+            raise ValueError(
+                f'{self.__class__} object must either be initialized with a list of rows or a list of rows must be passed to this method.'
+            )
+        if self.rows is not None and rows is not None:
+            raise ValueError(
+                f'{self.__class__} object must either be initialized with a list of rows or rows must be passed to this method, not both.'
+            )
+        
+        return rows if rows != None else self.rows
 
     def _get_columns(self):
+        """
+        Get all the columns of the csv
+        
+        Parameters:
+        None
+        
+        Returns:
+        list: List of column names as strings
+        """
         line = linecache.getline(self._filename, 1)
         csv_data = csv.reader([line])
         return [x for x in csv_data][0]
     
-    def nlargest(self, indices, n=20, axis=-1):
-        s = self[indices[0]]
-        for idx in indices[1:]:
+    def _rowsum(self, rows=None, n=20):
+        """
+        Sums a list of rows, elementwise 
+        
+        Parameters:
+        rows: List of rows to sum
+        
+        Returns:
+        list: Sum of rows, elementwise
+        """
+        rows = self._row_get(rows)
+        
+        s = self[rows[0]]
+        
+        for idx in rows[1:]:
             s += self[idx]
-
-        return [self.columns[idx] for idx in np.argsort(s, axis=axis)[-n: ]]
+        
+        return s
+        
+    def nlargest(self, rows=None, n=20, axis=-1, ascending=False):
+        """
+        Gets the n largest columns 
+        """
+        
+        rows = self._row_get(rows)
+        s = self._rowsum(rows, n)
+        
+        data = [self.columns[idx] for idx in np.argsort(s, axis=axis)[-n: ]]
+        return data[::-1] if ascending else data
     
-    def nsmallest(self, indices, n=20, axis=-1):
-        s = self[indices[0]]
-        for idx in indices[1:]:
-            s += self[idx]
+    def nsmallest(self, rows=None, n=20, axis=-1, ascending=False):
+        """
+        Gets the n smallest columns
+        """
+        rows = self._row_get(rows)
+        s = self._rowsum(rows, n)
 
-        return [self.columns[idx] for idx in np.argsort(s, axis=axis)[0: n]]
+        data = [self.columns[idx] for idx in np.argsort(s, axis=axis)[0: n]]
+        return data if ascending else data[::-1]
+    
+    def max(self, rows=None):
+        rows = self._row_get(rows)
+        
+        return max(self[rows])
+    
+    def min(self, rows=None):
+        rows = self._row_get(rows)
+        
+        return min(self[rows])
+        
