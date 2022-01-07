@@ -141,8 +141,8 @@ class Dataset:
         else:
             data = np.argsort(s)[-n: ]
             
-        return data[::-1] if ascending else data
-    
+        return data if ascending else data[::-1]
+
     def nsmallest(self, rows=None, n=20, axis=0, ascending=False):
         """
         Gets the n smallest rows or columns (summed), depending on the axis 
