@@ -122,12 +122,17 @@ class Dataset:
         csv_data = csv.reader([line])
         return [x for x in csv_data][0]
     
-    def nlargest(self, rows=None, n=20, axis='rows', ascending=False):
+    def sum(self, rows=None, axis=0):
+        """Sums the given rows by the given axis"""
+        rows = self._row_get(rows)
+        
+        return np.sum(self[rows], axis=axis)
+        
+    def nlargest(self, rows=None, n=20, axis=0, ascending=False):
         """
-        Gets the n largest rows or columns, depending on the axis 
+        Gets the n largest rows or columns (summed), depending on the axis 
         """
         
-        axis = (1 if axis == 'rows' else 0)
         rows = self._row_get(rows)
         s = np.sum(self[rows], axis=axis)
         
@@ -138,27 +143,17 @@ class Dataset:
             
         return data[::-1] if ascending else data
     
-    def nsmallest(self, rows=None, n=20, axis='rows', ascending=False):
+    def nsmallest(self, rows=None, n=20, axis=0, ascending=False):
         """
-        Gets the n smallest rows or columns, depending on the axis 
+        Gets the n smallest rows or columns (summed), depending on the axis 
         """
         
-        axis = (1 if axis == 'rows' else 0)
         rows = self._row_get(rows)
         s = np.sum(self[rows], axis=axis)
-        
+        print(s)
         if axis == 0:
             data = [self.columns[idx] for idx in np.argsort(s)[0: n]]
         else:
             data = np.argsort(s)[0: n]
             
         return data[::-1] if ascending else data
-    
-    def max(self, rows=None):
-        rows = self._row_get(rows)
-        return max(self[rows])
-    
-    def min(self, rows=None):
-        rows = self._row_get(rows)
-        return min(self[rows])
-        
